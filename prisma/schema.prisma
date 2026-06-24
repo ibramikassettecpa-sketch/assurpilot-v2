@@ -1,0 +1,99 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+}
+
+model Prospect {
+  id            String   @id @default(cuid())
+  nom           String?
+  prenom        String?
+  telephone     String
+  dateNaissance String?
+  email         String?
+  societe       String?
+  adresse       String?
+  ville         String?
+  codePostal    String?
+  notes         String?
+  tags          String   @default("[]")
+  customFields  String   @default("{}")
+  statut        String   @default("nouveau")
+  doNotCall     Boolean  @default(false)
+  leadScore     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  calls         Call[]
+}
+
+model Call {
+  id           String    @id @default(cuid())
+  prospectId   String
+  prospect     Prospect  @relation(fields: [prospectId], references: [id])
+  vapiCallId   String?   @unique
+  agentId      String?
+  campaignId   String?   // links call to a campaign
+  statut       String    @default("initie")
+  duree        Int?
+  transcript   String?
+  resume       String?
+  recordingUrl String?
+  leadScore    Int?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Agent {
+  id               String   @id @default(cuid())
+  nom              String
+  langue           String   @default("fr")
+  modele           String   @default("claude-haiku-4-5")
+  voix             String   @default("charlotte")
+  messageAccueil   String
+  scriptCommercial String
+  notesObjections  String   @default("")
+  objectif         String   @default("")
+  phoneNumberId    String   @default("")
+  transferPhone    String   @default("")
+  triggerPhrases   String   @default("[]")
+  vapiAssistantId  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Campaign {
+  id              String   @id @default(cuid())
+  nom             String
+  agentId         String
+  statut          String   @default("en_attente") // en_attente | en_cours | pause | termine
+  concurrency     Int      @default(3)
+  heureDebut      String   @default("09:00")
+  heureFin        String   @default("20:00")
+  filtreStatut    String?  // filter prospects by statut (null = all)
+  prospectIds     String   @default("[]") // JSON ordered list of prospect IDs
+  totalProspects  Int      @default(0)
+  applesEffectues Int      @default(0)
+  applesReussis   Int      @default(0)   // interesse + transfere
+  applesEchec     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WebhookConfig {
+  id        String   @id @default(cuid())
+  url       String
+  secret    String
+  actif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
