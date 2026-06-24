@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "next start -H 0.0.0.0 -p $PORT",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "node .next/standalone/server.js",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
