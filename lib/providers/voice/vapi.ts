@@ -21,40 +21,26 @@ function vapiHeaders() {
 }
 
 function buildModelConfig(modele: string) {
-  if (modele === 'claude-haiku-4-5' || modele === 'claude-sonnet-4-6') {
-    const anthropicKey = process.env.ANTHROPIC_API_KEY
-    if (!anthropicKey || anthropicKey === 'COLLER_VOTRE_CLE_ANTHROPIC_ICI') {
-      throw new Error('ANTHROPIC_API_KEY manquante — ajoutez-la dans votre fichier .env')
-    }
-    return {
-      provider: 'anthropic',
-      model: modele,
-      temperature: 0.6,
-      maxTokens: 200,
-      // Register ANTHROPIC_API_KEY as provider key in Vapi dashboard:
-      // dashboard.vapi.ai → Provider Keys → Anthropic
-    }
+  const MODEL_MAP: Record<string, string> = {
+    'claude-haiku-4-5':   'claude-haiku-4-5-20251001',
+    'claude-sonnet-4-6':  'claude-sonnet-4-6',
+    'gemini-flash':       'gemini-2.0-flash-exp',
   }
-  if (modele === 'gemini-flash') {
+  const resolvedModel = MODEL_MAP[modele] ?? 'claude-haiku-4-5-20251001'
+
+  if (resolvedModel.startsWith('gemini')) {
     const googleKey = process.env.GOOGLE_API_KEY
     if (!googleKey || googleKey === 'COLLER_VOTRE_CLE_GOOGLE_ICI') {
-      throw new Error('GOOGLE_API_KEY manquante — ajoutez-la dans votre fichier .env')
+      throw new Error('GOOGLE_API_KEY manquante')
     }
-    return {
-      provider: 'google',
-      model: 'gemini-2.0-flash-exp',
-      temperature: 0.6,
-      maxTokens: 200,
-      // Register GOOGLE_API_KEY as provider key in Vapi dashboard:
-      // dashboard.vapi.ai → Provider Keys → Google
-    }
+    return { provider: 'google', model: resolvedModel, temperature: 0.6, maxTokens: 200 }
   }
-  return {
-    provider: 'anthropic',
-    model: 'claude-haiku-4-5',
-    temperature: 0.6,
-    maxTokens: 200,
+
+  const anthropicKey = process.env.ANTHROPIC_API_KEY
+  if (!anthropicKey || anthropicKey === 'COLLER_VOTRE_CLE_ANTHROPIC_ICI') {
+    throw new Error('ANTHROPIC_API_KEY manquante')
   }
+  return { provider: 'anthropic', model: resolvedModel, temperature: 0.6, maxTokens: 200 }
 }
 
 function buildAssistantPayload(params: CreateAssistantParams) {
