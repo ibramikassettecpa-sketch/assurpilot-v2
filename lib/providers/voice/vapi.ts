@@ -131,9 +131,9 @@ RÈGLES IMPORTANTES :
       ...(tools.length > 0 && { tools }),
     },
     voice: {
-      provider: '11labs',
-      voiceId: params.voix || 'charlotte',
-    },
+       provider: 'azure',
+       voiceId: 'fr-FR-DeniseNeural',
+          },
     transcriber: {
       provider: 'deepgram',
       model: 'nova-2',
